@@ -1,0 +1,264 @@
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    
+	<title>天天生鲜-用户中心</title>
+	<link rel="stylesheet" type="text/css" href="css/reset.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="stylesheet" type="text/css" href="css/basic.css">
+	<style>
+		.col001{
+		    height: 40px;
+    		line-height: 40px;
+    		float: left;
+    		text-align: center;
+		}
+		}
+		.orderss{
+		width:1200px;
+		border: 3px  #80B2FF;
+		border-style: solid none solid none ;
+		margin-bottom: 20px;
+		
+		}
+		.orderss h2{
+		    background: none repeat scroll 0 0 #fff2e4;
+		    color: #745f47;
+		    font-family: '微软雅黑';
+		    font-size: 18px;
+		    font-weight: bold;
+		    height: 34px;
+		    line-height: 34px;
+		    margin: 0;
+		    padding: 0 0 0 14px;
+		}
+		.em {
+		    color: #80B2FF;
+		    font-size: 22px;
+		    font-weight: bold;
+		   	padding-left: 400px;
+		}
+		.em1{
+		    color: #80B2FF;
+		    font-size: 22px;
+		    font-weight: bold;
+		   
+		}
+		.span_time{
+			float: right;
+			margin-right: 20px;
+		}
+		 .order_ul{
+			width: 671px;
+			border: 1px solid #ddd;
+			background-color: #edfff9;
+			
+	  	 	 margin-top: 0px;
+			margin-top: -1px;
+			}
+			 .order_ul2{
+			width: 520px;
+			height: 100%;
+			border: 1px solid #ddd;
+			background-color: #edfff9;
+	  	 	margin-top: 0px;
+			margin-top: -1px;
+			}
+			.order_ul img{
+			   width: 100px;
+			    height: 100px;
+			    border: 1px solid #ddd;
+			    display: block;
+			    margin: 10px auto 0;
+			
+			}
+			.order_ul li{
+			height: 120px;
+			line-height: 120px;
+			float: left;
+			text-align: center;
+			}
+			.order_ul2 li{
+			font-size:17px;
+			font-weight:500;
+			height: 120px;
+			padding-top:20px;
+			float: left;
+			text-align: center;
+			position: relative;
+			}
+			
+</style>
+    
+</head>
+<body>
+
+<div id="header">
+	<div class="header_con">
+		<div class="header">
+			<div class="welcome fl">欢迎来到天天生鲜!</div>
+			<div class="fr">               
+				<div class="login_btn fl">
+					<a v-if="onlogin"class="yellowd1" rel="nofollow" href="person.html"target="_blank">用户名:&nbsp;&nbsp;{{memberInfo.nickName}}</a>
+					<a v-else class="yellowd1" rel="nofollow"href="login.html"target="_blank">请登录</a>
+                    <span>|</span>
+					<a href="javascript:excel()">退出</a>
+				</div>                
+				<div class="user_link fl">
+					<span>|</span>
+					<a href="person.html">用户中心</a>
+					<span>|</span>
+					<a href="shopcart.html">我的购物车</a>
+					<span>|</span>
+					<a href="order.html">我的订单</a>
+				</div>
+			</div>
+		</div>		
+	</div>
+</div>
+
+
+	<div class="search_bar clearfix">
+		<a href="index.html" class="logo fl"><img src="images/logo.png"></a>
+		<div class="sub_page_name fl">|&nbsp;&nbsp;&nbsp;&nbsp;我的订单</div>
+		
+	</div>
+
+
+
+<div id="Myorder">
+    <div class="main_con clearfix">
+		<div class="left_menu_con clearfix">
+			<h3>用户中心</h3>
+			<ul>
+				<li><a href="person.html" >· 个人信息</a></li>
+				<li><a href="order.html" class="active">· 全部订单</a></li>
+				<li><a href="place.html" >· 收货地址</a></li>
+			</ul>
+		</div>
+        
+       
+		<div class="right_content clearfix">
+                <input type='hidden' name='csrfmiddlewaretoken' value='xuLccn44vOS5LUFlJQSjbjIvEHpmmf1n' />
+				<h3 class="common_title2">全部订单</h3>
+				 <ul class="cart_list_th clearfix">
+				<li class="col001 " style="width:370px;">宝贝</li>
+				<li class=" col001" style="width:8%;">商品价格</li>
+				<li class=" col001" style="width:5%;">数量</li>
+				<li class=" col001" style="width:10%;">实付款</li>
+				<li class=" col001" style="width:28%;">收货地址</li>
+				<li class=" col001" style="width:8%;">交易状态</li>
+				<li class=" col001" style="width:8%;">操作</li>
+				</ul><!--  -->
+			    <div class="orderss"  v-for="(od) in orders" style="width:1200px;border: 3px  #80B2FF;border-style: solid none solid none ;margin-bottom: 20px;">
+			    <h2>店铺名:{{od.sname}} <span class="span_time">下单时间:{{od.odate}}</span></h2>
+				<div style="float: left;">
+					<div style="float: left;">
+						<ul class="order_ul clearfix" v-for="(item,index) in (od.details)"  >
+						
+						<li class="col02" style="width:120px;"><img :src="item.pics.split(';')[0]" width="100px" height="100px"></li>
+						<li class="col01" style="width:250px;">{{item.gname}}</li>
+						<li class="col01" style="width:100px;">&yen;{{item.price}}</li>
+						<li class="col01" style="width:60px;">{{item.nums}}</li>
+						<li class="col01" style="width:120px;" v-html="'&yen;' + (item.price * item.nums).toFixed(2)"></li>
+						
+						</ul>
+					</div>
+					<div v-bind:style="{height:od.details.length*120+'px' ,float:'left' }" >
+					<!-- <li class="col01" style="width:336px;" colspan="2">1</li> -->
+						<ul class="order_ul2 clearfix" style="height: 100%;" >
+							<li class="col01" style="width:330px;height: 100%;" ><div v-bind:style="{height:od.details.length*40+'px'}"></div><p class="ppp">{{od.place.pname+" "+od.place.province+" "+od.place.city+" "+od.place.area+" "+od.place.addr+" "+od.place.tel}}</p></li>
+							<li class="col01" style="width:94px;height: 100%;" v-if="od.status== 0"><div v-bind:style="{height:od.details.length*40+'px'}"></div><p>待支付</p></li>
+							<li class="col01" style="width:94px;height: 100%;"  v-else-if="od.status== 1"><div v-bind:style="{height:od.details.length*40+'px'}"></div><p>已支付代发货</p></li>
+							<li class="col01" style="width:94px;height: 100%;" v-else-if="od.status== 2"><div v-bind:style="{height:od.details.length*40+'px'}"></div><p>待确认收货</p></li>
+							<li class="col01" style="width:94px;height: 100%;"  v-else><div v-bind:style="{height:od.details.length*40+'px'}"></div>完成</li>
+							
+							<li class="col01" style="width:90px;height: 100%;" v-if="od.status== 0"><div v-bind:style="{height:od.details.length*40+'px'}"></div><a href="javascript:void(0)" @click="addzfb(od.oid,od.total)">去支付>></a></li>
+							<li class="col01" style="width:90px;height: 100%;"  v-else-if="od.status== 2"><div v-bind:style="{height:od.details.length*40+'px'}"></div><a>确认收货>></a></li>
+							<li class="col01" style="width:90px;height: 100%;"  v-else><div v-bind:style="{height:od.details.length*40+'px'}"></div>暂无操作</li>
+						</ul>
+					</div>
+					
+					
+				</div>
+				<div style="clear: both;"></div>
+				<em class="em1">订单编号: {{od.oid}}</em>
+					<em class="em">店铺合计(含运费):&yen;{{od.total}}</em>
+			  </div>
+				<div id="pagination" class="pagenation"></div>
+		</div>
+
+    </div>
+</div>
+
+	<div class="footer">
+		<div class="foot_link">
+			<a href="#">关于我们</a>
+			<span>|</span>
+			<a href="#">联系我们</a>
+			<span>|</span>
+			<a href="#">招聘人才</a>
+			<span>|</span>
+			<a href="#">友情链接</a>		
+		</div>
+		<p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
+		<p>电话：010-****888    京ICP备*******8号</p>
+	</div>
+  <div id="order_zfb"></div>
+   <script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript" src="js/axios.js"></script>
+<script type="text/javascript" src="js/qs.js"></script>
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript" src="js/showpage.js"></script>
+<script>
+var page =  1;
+var rows = 2;
+let app = new Vue({
+	el:"#Myorder",//这个vue对象的作用范围
+	data:{
+		orders:[],//订单数组
+		total:"",//总记录数
+		
+	},
+	mounted:function(){//vue渲染完成后要执行的方法
+		axios.post("order",qs.stringify({op:"findByPage",page:page,rows:rows})).then(rt =>{
+			//console.log(rt.data.total);
+			//console.log(rt.data.rows);
+			if(rt.status ==200){
+				this.total = rt.data.total;
+				this.orders = rt.data.rows;
+				$("#pagination").showPage(Math.ceil(this.total / rows));
+				
+			}		
+			
+		}) 
+	},
+	methods:{
+		addzfb: function(oid,total){
+			axios.post("zfb",qs.stringify({oid:oid,total:total})).then(rt =>{
+				$("#order_zfb").html(rt.data);
+				console.log(rt.data);
+			})
+			
+		}
+		}
+})
+function findByPage (index){
+	page = index;
+	axios.post("order",qs.stringify({op:"findByPage",page:page,rows:rows})).then(rt =>{
+		if(rt.status ==200){
+			app.$data.orders=rt.data.rows;
+		}
+	})
+}
+</script>
+
+</body>
+</html>

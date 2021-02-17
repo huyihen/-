@@ -1,0 +1,421 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<!-- 移动端优化 -->
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />  
+	<title>天天生鲜-用户中心</title>
+	<link rel="stylesheet" type="text/css" href="css/reset.css">
+	<link rel="stylesheet" type="text/css" href="css/basic.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="SHORTCUT ICON" href="images/logo.png">
+    <style>
+		dd{
+		font-weight:bold;
+		}
+		.tj_a{
+		float:right;
+		display: inline-block;
+		
+		}
+		.tj_a:hover{
+		color: #1afa29;
+		
+		}
+		.site_con_a{
+		 display: inline-block;
+		 width: 16px;
+    	 height: 16px;
+    	 background:url("image/update_p1.png") no-repeat;
+    	
+		}
+		.site_con_a:hover{
+		display: inline-block;
+		 width: 20px;
+    	 height: 20px;
+    	 background:url("image/update_p2.png") no-repeat;
+    	
+		}
+		.displays{display:none;}
+		#container{
+		width: 500px;
+		height: 500px;
+		}
+		.map{
+			position: relative;
+			left: 430px;
+			bottom: 300px;
+		}
+	</style>
+</head>
+<body>
+
+
+<div id="header">
+	<div class="header_con">
+		<div class="header">
+			<div class="welcome fl">欢迎来到天天生鲜!</div>
+			<div class="fr">               
+				<div class="login_btn fl">
+					<a v-if="onlogin"class="yellowd1" rel="nofollow" href="#"target="_blank">用户名:&nbsp;&nbsp;{{memberInfo.nickName}}</a>
+					<a v-else class="yellowd1" rel="nofollow"href="login.html"target="_blank">请登录</a>
+                    <span>|</span>
+					<a href="javascript:excel()">退出</a>
+				</div>                
+				<div class="user_link fl">
+					<span>|</span>
+					<a href="person.html">用户中心</a>
+					<span>|</span>
+					<a href="shopcart.html">我的购物车</a>
+					<span>|</span>
+					<a href="/user/order/1">我的订单</a>
+				</div>
+			</div>
+		</div>		
+	</div>
+
+
+
+
+<div class="search_bar clearfix">
+		<a href="index.html" class="logo fl"><img src="images/logo.png"></a>
+		<div class="sub_page_name fl">|&nbsp;&nbsp;&nbsp;&nbsp;用户中心</div>
+		
+</div>
+
+
+
+
+    <div class="main_con clearfix">
+		<div class="left_menu_con clearfix">
+			<h3>用户中心</h3>
+			<ul>
+				<li><a href="person.html" >· 个人信息</a></li>
+				<li><a href="order.html" >· 全部订单</a></li>
+				<li><a href="place.html" class="active">· 收货地址</a></li>
+			</ul>
+		</div>
+        
+        
+		<div class="right_content clearfix">
+				<h3 class="common_title2">收货地址</h3>
+				<a class="tj_a" href="javascript:show_add();">添加更多地址>></a>
+				<div class="site_con">
+					<dl>
+						<dt>当前地址：</dt>
+                            <dd v-if="pid_2!=''">{{pid_2}} <a class="site_con_a" href="javascript:void(0);" @click="updatePlace(0)"> </a> <a href="javascript:void(0);" @click="del(0)">删除</a></dd>
+                            <dd v-else >暂无默认地址</dd>
+                            
+                    </dl>
+                    <dl>
+						<dt>更多地址：</dt>
+                            <dd v-for="(place,index) in places" v-if="place.status !=2" >
+                            {{place.pname+" "+place.province+" "+place.city+" "+place.area+" "+place.addr+" "+place.tel}}
+                            <a class="site_con_a" href="javascript:void(0);" @click="updatePlace(index)"> </a>
+                            <a href="javascript:void(0);" @click="updatestatus(index)">设为默认地址</a>  <a href="javascript:void(0);" @click="del(index)">删除</a>
+                            </dd>
+                            </dd>
+                    </dl>
+				</div>
+				<div id="bjdz" class=" displays">
+				<h3 class="common_title2 ">编辑地址</h3>
+				<div class="site_con" style="width: 410px;">
+					
+                        <input type='hidden' name='csrfmiddlewaretoken' value='xuLccn44vOS5LUFlJQSjbjIvEHpmmf1n' />
+						<div class="form_group">
+							<label>收件人：</label>
+							<input type="text" id="place_pname" name="place_pname" v-model="pname">
+						</div>
+						
+						<div class="form_group">
+						<label>省市：</label><select id="place_province" style="width:90px" v-model="province" ></select>
+						<select id="place_city" style="width:90px" v-model="city" ></select>
+						<select id="place_area" style="width:90px" v-model="area"  ></select>
+						</div>
+						<div class="form_group">
+							<label>详细地址：</label>
+							<input id="place_addr" type="text" placeholder="请输入详细地址..." v-model="addr" />
+						</div>
+						<div class="form_group">
+							<label>手机：</label>
+							<input type="text" v-model="tel"name="tel" id="utel"onblur="vaTel()">
+							<font color="red"><span id="telDiv"></span></font>
+						</div>
+						<div style="margin-top: 30px;">
+						<input v-if="isupdate" type="button" value="修改" class="info_submit" @click="updat_place">
+						<input v-else type="button" value="提交" class="info_submit" @click="add">
+						<input  type="button" value="取消" class="info_submit" onclick="none()">
+						</div>
+				</div>
+				<div id="container" class="map"></div> 	
+				</div>
+		</div>
+		
+    </div>
+</div>
+	
+	<div class="footer">
+		<div class="foot_link">
+			<a href="#">关于我们</a>
+			<span>|</span>
+			<a href="#">联系我们</a>
+			<span>|</span>
+			<a href="#">招聘人才</a>
+			<span>|</span>
+			<a href="#">友情链接</a>		
+		</div>
+		<p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
+		<p>电话：010-****888    京ICP备*******8号</p>
+	</div>
+	
+	<div class="popup_con">
+	<div class="popup">
+		<p id="popup_info"></p>
+	</div>
+</div>
+<script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript" src="js/axios.js"></script>
+<script type="text/javascript" src="js/qs.js"></script>
+<script type="text/javascript" src="js/addr2.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=S6P5vKr1BZzEPFIS7jvSeI0QdlhRvgC4"></script>
+<script type="text/javascript">
+var map;
+
+var mid="";
+let header = new Vue({
+	el:"#header",//这个vue对象的作用范围
+	data:{
+		onlogin: false,//是否登陆
+		memberInfo:{} , //当前登陆对象
+		pid_2:'',//默认地址
+		places:[],//地址数组
+		isupdate:false,
+		pid:"",
+		pname: "",
+		province: "",
+		city: "",
+		area: "",
+		addr: "",
+		tel: "",
+	},
+	watch: {
+		province: function() {
+			this.baidumap(this.province);
+		},
+		city: function() {
+			this.baidumap(this.province + " " + this.city);
+		},
+		area: function() {
+			this.baidumap(this.province + " " + this.city + " " + this.area);
+		},
+		addr: function() {
+			this.baidumap(this.province + " " + this.city + " " + this.area + " " + this.addr);
+		}
+	},
+	mounted:function(){//vue渲染完成后要执行的方法
+		
+		$("#info_con input").attr("disabled","true");
+		//发送一个请求去获取用户登陆信息
+		axios.get("member",{params:{op:"check1"}}).then( rt => {
+		
+			if(rt.status ==200 && rt.data.code ==200){//说明成功
+				this.onlogin = true;  
+				//console.log(this.memberInfo);
+				this.memberInfo = rt.data.data;
+				mid=this.memberInfo.mid;
+				
+				//console.log(this.memberInfo);
+			}else{
+				this.onlogin = false;  
+				this.memberInfo = {};
+			}
+			if(!this.onlogin){
+				showMsg("请先登录...","red", function(){location.href='login.html'});
+				return;			
+			}
+		})
+		axios.post("place",qs.stringify({op:"findAll"})).then(rt =>{
+			
+			if(rt.status ==200 ){//说明成功
+			console.log(rt.data[0]);
+			this.places=rt.data;
+			if(rt.data[0].status == 2){
+				this.pid_2=rt.data[0].pname+" "+rt.data[0].province+" "+rt.data[0].city+" "+rt.data[0].area+" "+rt.data[0].addr+" "+rt.data[0].tel+" 默认地址";
+			}
+			}
+							
+		})   
+		
+	},
+	methods:{
+		del: function(index){
+			let pla=this.places[index];
+			
+			this.pid=pla.pid;
+			axios.post("place", qs.stringify({op:"del",pid:this.pid})).then(rt=>{
+				if(rt.status == 200 && rt.data.code == 200){
+					
+					showMsg("删除成功","green",function(){location.href='place.html'});
+					return;
+				}
+				showMsg("删除失败","red");
+			})
+		},
+		add: function(){
+			if(this.pname == "" || this.provice == "" || this.city == "" || this.area == "" || this.addr == "" || !vaTel()){
+				showMsg("您输入的信息不完整，请确认后重新提交...","red");
+				return;
+			}
+			axios.post("place", qs.stringify({op:"add",mid:mid,pname:this.pname, province:this.province, city:this.city, area:this.area, addr:this.addr, tel:this.tel,status:1})).then(rt=>{
+				if(rt.status == 200 && rt.data.code == 200){
+					
+					showMsg("添加成功","green",function(){location.href='place.html'});
+					return;
+				}
+				showMsg("添加失败","red");
+			})
+		},
+		updat_place: function(){
+			if(this.pname == "" || this.provice == "" || this.city == "" || this.area == "" || this.addr == "" || !vaTel()){
+				showMsg("您输入的信息不完整，请确认后重新提交...","red");
+				return;
+			}
+			axios.post("place", qs.stringify({op:"update",mid:mid,pname:this.pname, province:this.province, city:this.city, area:this.area, addr:this.addr, tel:this.tel,pid:this.pid})).then(rt=>{
+				if(rt.status == 200 && rt.data.code == 200){
+					
+					showMsg("修改成功","green",function(){location.href='place.html'});
+					return;
+				}
+				showMsg("修改失败","red");
+			})
+		},
+		updatePlace: function(index){
+			let pla=this.places[index];
+			show_add();
+			this.pid=pla.pid;
+			this.isupdate=true;
+			this.pname=pla.pname;
+			
+			//show_pca(pla.province,pla.city,pla.area);
+			this.addr=pla.addr;
+			this.tel=pla.tel;
+
+		},
+		updatestatus: function(index){//设置为默认地址
+			let pla=this.places[index];
+			axios.post("place", qs.stringify({op:"updateStatus",pid:pla.pid})).then(rt=>{
+				if(rt.status == 200 && rt.data.code == 200){
+					
+					location.href='place.html';
+					return;
+				}
+				showMsg("修改失败","red");
+			})
+			
+		},
+		baidumap: function(address) {
+			map(address);
+		}
+	}
+	
+})
+function show_pca(province,city,area){
+	console.log(province+city+area)
+	
+	
+}
+function none(){
+	$("#bjdz").addClass("displays");
+}
+function map(address){
+
+	var map = new BMap.Map("container");  // 创建Map实例
+	var point = new BMap.Point(116.404, 39.915);  // 初始化地图,设置中心点坐标和地图级别
+	// 创建点坐标 
+	if(address !=""){
+		map.centerAndZoom(address, 13);
+	}
+	map.centerAndZoom(point, 15); 
+	// 城市控件
+	map.enableScrollWheelZoom();//滚轮缩放
+	map.enableInertialDragging(); 
+	map.enableContinuousZoom();
+	
+	// 点击事件信息处理
+	var geoc = new BMap.Geocoder();
+	map.addEventListener("click", function(e) {
+		var pro = "";
+		var pt = e.point;
+		map.clearOverlays();
+		map.addOverlay(new BMap.Marker(pt));
+		geoc.getLocation(pt, function(rs){
+			var addComp = rs.addressComponents;
+			 
+	       
+		
+	        //alert(pt.lng + ", " + pt.lat + ", " + addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+			mapResult(addComp.province,addComp.city,addComp.district,addComp.street,addComp.streetNumber,pt.lng,pt.lat);
+		
+		});
+	});
+}
+//地图返回参数
+function mapResult(province,city,district,street,streetNumber,lng,lat){
+
+	header.$data.province=province;
+	header.$data.city=city;
+	header.$data.area=district;
+	header.$data.addr=street+streetNumber;
+	console.log(header.$data.province);
+	console.log(header.$data.city);
+	console.log(header.$data.area);
+}
+function show_add(){
+	header.$data.isupdate=false;
+	bindAddr("xml/city.xml");
+	//	<div id="bjdz" class=" displays">
+	$("#bjdz").removeClass("displays");
+	map("");
+}
+function showMsg(msg,color,callback){
+	$("#popup_info").text(msg).css("color",color);
+	$(".popup_con").fadeIn('fast',function(){
+		setTimeout(function() {
+			$(".popup_con").fadeOut('fast',callback);
+		}, 2000);
+		
+	})
+}
+
+
+function excel(){
+	$.post("member", {op:"excel"},data =>{
+				location.href='login.html';
+		},"json");
+}
+
+//验证电话号码
+function vaTel(){
+	var regtel = /^[1][3,5,7,8][0-9]{9}$/;
+	var tel= document.getElementById("utel").value;
+	var telDiv = document.getElementById("telDiv");
+	var utel = document.getElementById("utel");
+	if(regtel.test(tel)){
+		telDiv.innerHTML ="";
+		utel.setAttribute("class","green");
+		return true;
+	}else{
+		telDiv.innerHTML = "手机号格式有误";
+		utel.setAttribute("class","red");
+		return false;
+	}
+}
+
+
+</script> 
+<script>
+</script>
+</body>
+</html>

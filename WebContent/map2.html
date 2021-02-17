@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+		body, html {width: 500px;height: 500px;margin:0;font-family:"微软雅黑";font-family:"微软雅黑";}
+		#allmap{width:100%;height:100%;}
+		p{margin-left:5px; font-size:14px;}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=S6P5vKr1BZzEPFIS7jvSeI0QdlhRvgC4"></script>
+	<script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/jsAddress.js"></script>
+	
+	<title>地图单击事件</title>
+</head>
+<body>
+	<select class="locSel" id="s_province_a"></select>
+	<select class="locSel" id="s_city_a" ></select>
+	<select class="locSel" id="s_county_a"></select>
+	<input  id="streetAndNum" type="text"  />
+	<a href="javascript:dian()" >标注地图</a>
+	<!-- 存放经度和维度 -->
+	<input type="hidden" name="detailedLocal" id="f_lng" />
+	<input type="hidden" name="detailedLocal" id="f_lat" />
+	<div id="allmap"></div>
+</body>
+</html>
+<script type="text/javascript">
+addressInit('s_province_a', 's_city_a', 's_county_a');
+$('#s_province_a,#s_city_a,#s_county_a').change(function() {
+	//console.log($('#s_province_a').val());
+	
+    dian();
+})
+    // 地图返回参数
+	function mapResult(province,city,district,street,streetNumber,lng,lat){
+		$("#streetAndNum").val(street+streetNumber);
+		$("#f_lng").val(lng);
+		$("#f_lat").val(lat);
+		var opp = "option:contains('"+province+"')";
+		var opc = "option:contains('"+city+"')";
+		var opd = "option:contains('"+district+"')";
+		$("#s_province_a").find(opp).attr("selected",true);
+		// 初始化市
+		addressInit('s_province_a', 's_city_a', 's_county_a');
+		
+		$("#s_city_a").find(opc).attr("selected",true);
+		// 初始化区
+		addressInit('s_province_a', 's_city_a', 's_county_a');
+		$("#s_county_a").find(opd).attr("selected",true);
+	}
+	// 下拉框选择省市
+	$(function(){
+		$(".locSel").each(function(){
+			$(this).change(function(){
+				//选择了地点, 清空隐藏域
+				$("#streetAndNum").val("");
+				$("#f_lng").val("");
+				$("#f_lat").val("");
+				 if($(this).index() == 0){
+					$("#f_province").val($(this).find("option:selected").text());
+					$("#f_city").val("");
+					$("#f_district").val("");
+				}else if($(this).index() == 1){
+					$("#f_city").val($(this).find("option:selected").text());
+					$("#f_district").val("");
+				}else {
+					$("#f_district").val($(this).find("option:selected").text());
+				} 
+			});
+		});
+	}); 
+</script>
+<script type="text/javascript">
+ 	// 百度地图API功能
+	var map = new BMap.Map("allmap");
+ 
+	// 默认地图北京市 缩放比：13
+	var point = new BMap.Point(116.331398,39.897445);
+	map.centerAndZoom(point, 13);
+ 
+	// 城市控件
+	map.enableScrollWheelZoom();
+	map.enableInertialDragging();
+	
+	map.enableContinuousZoom();
+	var size = new BMap.Size(10, 20);
+	map.addControl(new BMap.CityListControl({
+	    anchor: BMAP_ANCHOR_TOP_LEFT,
+	    offset: size,
+	    // 切换城市之间事件
+	     onChangeBefore: function(){
+	        alert('before');
+	     },
+	    // 切换城市之后事件
+	     onChangeAfter:function(){
+	       alert('after');
+	     }
+	}));
+	
+	// 初始化位置
+	var dlng = document.getElementById("f_lng").value;
+	var dlat = document.getElementById("f_lat").value;
+	
+	function dian(){
+		//var dcityp = document.getElementById("s_city_a");
+		//var dcityidx = dcityp.selectedIndex; // 选中索引
+		//var dcity = dcityp.options[dcityidx].text; // 选中文本
+		var dcity =$('#s_city_a').val();
+		console.log($('#s_city_a').val());
+		//var ddistp = document.getElementById("s_county_a");
+		//var ddisidx = ddistp.selectedIndex; // 选中索引
+		//var ddist = ddistp.options[ddisidx].text; // 选中文本
+		var ddist =$('#s_county_a').val();
+		var streetAndNum=$('#streetAndNum').val();
+		console.log(ddist);
+		if(dlng != "" && dlat != ""){
+			// 经纬度定位
+			map.clearOverlays(); 
+			var new_point = new BMap.Point(dlng,dlat);
+			var marker = new BMap.Marker(new_point);  // 创建标注
+			map.addOverlay(marker);              // 将标注添加到地图中
+			map.panTo(new_point);      
+		}else if(ddist != ""&& ddist != "市、县级市" ){
+			// 区域定位
+			map.centerAndZoom(ddist,13);      // 用城市名设置地图中心点
+		}else if(dcity != "" && dcity != "地级市"){
+			// 城市定位
+			map.centerAndZoom(dcity,13);      // 用城市名设置地图中心点 && dcity != "地级市"
+		}else if(streetAndNum != ""){
+			map.centerAndZoom(streetAndNum,13);
+		}else{
+			// 本地定位
+			function myFun(result){
+				map.setCenter(result.name);
+			}
+			var myCity = new BMap.LocalCity();
+			myCity.get(myFun); 
+		}
+		
+	}
+	// 点击事件信息处理
+	var geoc = new BMap.Geocoder();
+	map.addEventListener("click", function(e) {
+		var pro = "";
+		var pt = e.point;
+		map.clearOverlays();
+		map.addOverlay(new BMap.Marker(pt));
+		geoc.getLocation(pt, function(rs){
+			var addComp = rs.addressComponents;
+			//alert(pt.lng + ", " + pt.lat + ", " + addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+			mapResult(addComp.province,addComp.city,addComp.district,addComp.street,addComp.streetNumber,pt.lng,pt.lat);
+		
+		});
+	});
+</script>

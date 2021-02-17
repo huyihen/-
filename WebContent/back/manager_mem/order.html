@@ -1,0 +1,254 @@
+<table id="order_data" data-options="fit:true"></table>
+
+<div id="goods_search">
+	<div class="datagrid-btn-separator"></div>
+	<label class="navy_lbl">店铺:</label>
+	<select id ="goods_search_tid" class="navy_slt200"></select>
+	<label class="navy_lbl">商品名称:</label><input type="text" id="goods_search_sname" class="navy_ipt200">
+	<a href="javascript:searchGoodsInfo()" class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a>
+</div>
+<div id="order_dialog" class="easyui-dialog" data-options="resizable:true,modal:true,closed:true">
+<form id="order_form">
+	<div id="show_dintro"></div>
+
+</form>
+</div>
+
+<style>
+#goods_form li{
+	list-style-type: none;
+	margin-top:20px;
+	float: left;
+	width: 50%;
+}
+#goods_form .myli{
+	width: 100%;
+}
+#goods_form li> label {
+	width: 100px;
+	display: inline-block;
+	text-align: right;
+}
+#show_goods_dialog_license{
+	border: 2px solid #ccc;
+	width: 400px;
+	height: 500px;
+	position: absolute;
+	top: 50px;
+	right: 50px;
+
+}
+</style>
+
+<script >
+var goods_types;
+var order_obj;
+var oid;
+$(function(){
+	$.post("../../shop",{op:"finds"},data =>{
+		goods_shops = data;
+		var str = '<option value="">--请选择--</option>';
+		$.each(data,function(index,item){
+			str +='<option value="'+item.sid+'">'+item.sname+'</option>';
+		})
+		$("#goods_search_sid").html("").append($(str));
+		
+		$("#goods_dialog_sid").html("").append($(str));
+		
+		showGoodsDataGrid();
+		
+	},"json");
+})
+function showGoodsDataGrid(){
+	order_obj = $('#order_data').datagrid({
+		url:'../../order',
+		queryParams:{op:"findByPagem"},
+		fitColumns:true,
+		striped:true,//设置为true将交替显示行背景。
+		loadMsg:"数据加载中...",//当从远程站点载入数据时，显示的一条快捷信息。
+		pagination:true,
+		rownumbers:true,
+		pageSize: 15,
+		singleSelect:true,
+		pageList: [1,2,5,10,15,20,30,40,50],
+		sortName: "oid",
+		remoteSort: false,
+		columns:[[
+			{field:'oid',title:'订单编号',width:100,align:'center',sortable:"true"},
+			{field:'mid',title:'会员编号',width:150,align:'center'},
+			{field:'sname',title:'店铺',width:100,align:'center'},
+			{field:'total',title:'总付款',width:80,align:'center'},
+			{field:'odate',title:'下单日期',width:150,align:'center'},
+			{field:'status',title:'类型状态',width:60,align:'center', formatter:function(val, row, index){
+				if(val == 0){
+					return '<font color="red">未支付</font>';
+				}else if(val == 1){
+					return '<font color="bulk">待发货</font>';
+				}else if(val == 2){
+					return '<font color="green">待收货</font>';
+				}else if(val == 3){
+					return '<font color="green">已完成</font>';
+				}else{
+					return '<font color="red">纠纷，联系客服</font>';
+				}		
+			}},
+			{field:'_operator',title:'操作',width:100,align:'center', formatter:function(val, row, index){
+			if(row.status=='1'){	return'<a href="javascript:update(\''+row.oid+'\')" class="navy-icon-edit">一键发货</a>&nbsp;<a href="javascript:showorderInfoDetail(\''+row.oid+'\')" class = "navy-icon-detail">详情</a>'}
+			else{return	'暂无操作&nbsp;<a href="javascript:showorderInfoDetail(\''+row.oid+'\')" class = "navy-icon-detail">详情</a>'};	
+			}}
+		]],
+		toolbar:"#goods_search"
+	});
+}
+
+function showorderInfoDetail(oid){
+	$("#order_form")[0].reset();
+	$.post("../../detail",{op:"findAll",oid:oid},data=>{
+		if(data.code == 200){
+			console.log(data.data);
+			var details=data.data;
+		   var imagStr="";
+			for( var i=0,len =details.length;i<len;i++){
+				imagStr +="<div><img src='../../"+details[i].pics+"' width='100px' height='100px' />"
+				imagStr +="<span>商品编号:"+details[i].gid+"<span/>||"
+				imagStr +="<span>商品名称:"+details[i].gname+"<span/>||"
+				imagStr +="<span>商品数量:"+details[i].nums+"<span/>||"
+				imagStr +="<span>商品价格:"+details[i].price+"<span/></div>"
+			}
+			$("#show_dintro").html("").append($(imagStr));
+			  
+			
+		}else{
+			
+		}
+		
+		
+	},"json")
+	$('#order_dialog').dialog({
+		title:'订单详细',
+		fit:true,
+		buttons:[
+			{
+				text:"关闭",
+				iconCls:"icon-cancel",
+				handler:function(){
+					$('#order_dialog').dialog('close')
+				}
+			}
+		]
+	});
+	$('#order_dialog').dialog('open');
+}
+function searchgoodsInfo(){
+	var sid = $.trim($("#goods_search_sid").val());
+	var gname = $.trim($("#goods_search_gname").val());
+	var status = $.trim($("#goods_search_status").val());
+	//console.log(status);
+	goods_obj.datagrid({
+		url:"../../goods", 
+		queryParams:{op:"findCondition",sid:sid,gname:gname,status:status}
+	})
+}
+function update(oid){
+	
+	
+	$.post("../../order",{op:"updates",oid:oid,status:"2"},data=>{//收货状态 0未支付 1已支付代发货  2已发货  3已收货(已完成） 4纠纷
+		console.log(data);	
+		if(data.code == 200){
+			$.messager.show({title:'成功提示',msg:'发货成功...',timeout:2000,showType:'slide'})
+			//刷新页面数据
+			order_obj.datagrid("reload");//从新加载数据   从新分页
+		}else{
+			//如果没有成功
+			order_obj.datagrid("rejectChanges");
+			$.messager.alert('失败提示','发货失败','error')
+		}
+		row = null;
+		
+	},"json")
+	
+}
+/*
+function showUpdategoodsInfoDialog(sid){
+	$("#goods_form")[0].reset();//表单重置[0]相当于是将jquery 对象转成js对象  $(obj)  ->  js对象转换成jquery对象
+	$("#goods_dialog_pics").html("");
+	$("#show_goods_dialog_license").html("");
+	//现根据编号查询这个店铺信息
+	
+	//$.post('../../goods',{op:"findBySid",sid: sid}, data=>{
+		
+	//},'json');
+	$('#goods_dialog').dialog({
+		title:"修改店铺信息",
+		fit:true,
+		buttons:[
+			{
+				text:"修改",
+				iconCls:"icon-edit",
+				handler:function(){
+					
+				}
+			},{
+				text:"取消",
+				iconCls:"icon-cancel",
+				handler:function(){
+					$('#goods_dialog').dialog('close')
+				}
+			}
+		]
+		
+	});
+	$('#goods_dialog').dialog('open');
+	
+}*/
+
+
+/*
+function showgoodsInfoDetail(sid){
+	$.post("../../goods",{op:"findBySid",sid:sid}, data =>{
+		if(data.code ==200){//说明成功
+			$("#goods_form input,#goods_form textarea").attr("readonly","true");
+			$("#goods_form select").attr("disabled","true");
+			$("#goods_dialog_tid").val(data.data.tid);//取类型编号
+			$("#goods_dialog_sname").val(data.data.sname);
+			$("#goods_dialog_province").val(data.data.province);
+			$("#goods_dialog_city").val(data.data.city);
+			$("#goods_dialog_area").val(data.data.area);
+			$("#goods_dialog_addr").val(data.data.addr);
+			$("#goods_dialog_tel").val(data.data.tel);
+			$("#goods_dialog_startHours").val(data.data.startHours);
+			$("#goods_dialog_endHours").val(data.data.endHours);
+			$("#goods_dialog_intro").val(data.data.intro);
+			
+			var imagStr = "<img src='../../"+data.data.license+"' width='400px' height='500px' />";
+			$("#show_goods_dialog_license").html("").append($(imagStr));
+			imagStr ="";
+			
+			var pics = data.data.pics.split(";");
+			for( var i=0,len =pics.length;i<len;i++){
+				imagStr +="<img src='../../"+pics[i]+"' width='100px' height='100px' />&nbsp;";
+			}
+			$("#show_goods_dialog_pics").html("").append($(imagStr));
+			$('#goods_dialog').dialog({
+				title: '店铺详细信息',
+				fit: true,
+				buttons: [
+					{
+						text:"关闭",
+						iconCls:"icon-cancel",
+						handler:function(){
+							$("#goods_dialog").dialog("close")
+						}
+						
+					}
+				]
+				
+			});
+			$("#goods_dialog").dialog("open");
+			
+		}
+	},"json");
+}*/
+</script>
+
+

@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>页面</title>
+	<link rel="SHORTCUT ICON" href="images/logo.png">
+</head>
+<body>
+	<select class="locSel" id="s_province_a"></select>
+	<select class="locSel" id="s_city_a"></select>
+	<select class="locSel" id="s_county_a"></select>
+	<input  id="streetAndNum" type="text" placeholder="滨兴路301号" />
+	<a href="javascript:void(0)" οnclick="window.open('map.html','_blank')">标注地图</a>
+	<!-- 存放经度和维度 -->
+	<input type="hidden" name="detailedLocal" id="f_lng" />
+	<input type="hidden" name="detailedLocal" id="f_lat" />
+</body>
+</html>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/ader.js"></script>
+<script type="text/javascript">
+	var dsy4 = new Dsy();
+    _create_dsy(dsy4);
+    var opt0 = ["省份","地级市","市、县级市"];
+    var s4=["s_province_a","s_city_a","s_county_a"];
+    _init_area(dsy4, 'dsy4', s4, 's4', opt0);
+ 
+    // 地图返回参数
+	function mapResult(province,city,district,street,streetNumber,lng,lat){
+		$("#streetAndNum").val(street+streetNumber);
+		$("#f_lng").val(lng);
+		$("#f_lat").val(lat);
+		var opp = "option:contains('"+province+"')";
+		var opc = "option:contains('"+city+"')";
+		var opd = "option:contains('"+district+"')";
+		$("#s_province_a").find(opp).attr("selected",true);
+		// 初始化市
+		change(dsy4,s4,1);
+		$("#s_city_a").find(opc).attr("selected",true);
+		// 初始化区
+		change(dsy4,s4,2);
+		$("#s_county_a").find(opd).attr("selected",true);
+	}
+	// 下拉框选择省市
+	$(function(){
+		$(".locSel").each(function(){
+			$(this).change(function(){
+				//选择了地点, 清空隐藏域
+				$("#streetAndNum").val("");
+				$("#f_lng").val("");
+				$("#f_lat").val("");
+				 if($(this).index() == 0){
+					$("#f_province").val($(this).find("option:selected").text());
+					$("#f_city").val("");
+					$("#f_district").val("");
+				}else if($(this).index() == 1){
+					$("#f_city").val($(this).find("option:selected").text());
+					$("#f_district").val("");
+				}else {
+					$("#f_district").val($(this).find("option:selected").text());
+				} 
+			});
+		});
+	}); 
+</script>
